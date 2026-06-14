@@ -1,0 +1,119 @@
+mcs.metadata:
+  componentName: Compliance Check
+kind: AdaptiveDialog
+modelDescription: Use this topic when the user asks whether the company complies with a regulation (GDPR, HIPAA, SOC2), requests a gap analysis, or asks if an internal policy meets a regulatory requirement.
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Compliance Check
+    triggerQueries:
+      - comply with GDPR
+      - GDPR compliant
+      - HIPAA compliant
+      - SOC2 compliant
+      - compliance check
+      - gap analysis
+      - does our policy
+      - is our policy compliant
+      - compliance gap
+      - regulatory requirement
+      - check compliance
+      - breach notification
+      - data retention compliance
+      - access control compliant
+
+  actions:
+    - kind: SetVariable
+      id: setVar_q8Rn2p
+      variable: init:Topic.T_UserQuestion
+      value: =System.Activity.Text
+
+    - kind: SendActivity
+      id: sendMsg_k7Lm3x
+      activity: Analysing compliance... I'm checking both regulatory requirements and your internal policies. This may take a moment.
+
+    # Step 1: Call Regulation IQ sub-agent
+    - kind: BeginDialog
+      id: beginDialog_r5Tp9w
+      input:
+        binding:
+          UserQuestion: =Topic.T_UserQuestion
+      dialog: cr47b_agent.agent.Regulation-IQ
+      output:
+        binding:
+          Result: init:Topic.T_RegulatorResponse
+
+    # Step 2: Call Internal Policy IQ sub-agent
+    - kind: BeginDialog
+      id: beginDialog_policyIQ
+      input:
+        binding:
+          UserQuestion: =Topic.T_UserQuestion
+      dialog: cr47b_agent.agent.Agent
+      output:
+        binding:
+          Result: init:Topic.T_PolicyResponse
+
+    # Step 3: Synthesise gap analysis
+    - kind: AnswerQuestionWithAI
+      id: answerAI_j4Yd8f
+      variable: init:Topic.T_GapAnalysisJson
+      userInput: ="Based on the following two answers, produce a compliance gap analysis report.\nREGULATOR SAYS: " & Topic.T_RegulatorResponse & "\nWE SAY: " & Topic.T_PolicyResponse & "\n\nUser question: " & Topic.T_UserQuestion
+      additionalInstructions: |
+        Format your response using these exact labels:
+        **Topic:** <topic>
+        **Regulation:** <regulation_name>
+        **Severity:** <LOW, MED, or HIGH>
+
+        **Regulator Says:** <exact regulatory requirement>
+        Citation: <article/section>
+
+        **We Say:** <what internal policy states>
+        Citation: <doc ID, section>
+
+        **Gap:** <description of the gap>
+
+        **Recommendation:** <remediation steps>
+
+    # Step 4: Persist gap analysis for GitHub issue filing
+    - kind: SetVariable
+      id: setVar_m9Hb5e
+      variable: Global.G_GapAnalysis
+      value: =Topic.T_GapAnalysisJson
+
+    # Step 5: Render action card (gap text auto-sent by AnswerQuestionWithAI above)
+    - kind: SendActivity
+      id: sendMsg_adaptiveCard
+      activity:
+        attachments:
+          - kind: AdaptiveCardTemplate
+            cardContent: "{\"type\":\"AdaptiveCard\",\"version\":\"1.5\",\"body\":[{\"type\":\"TextBlock\",\"text\":\"What would you like to do with this gap?\",\"weight\":\"Bolder\"},{\"type\":\"TextBlock\",\"text\":\"Select an action below:\",\"isSubtle\":true,\"spacing\":\"Small\"}],\"actions\":[{\"type\":\"Action.Submit\",\"title\":\"📌 File GitHub Issue\",\"style\":\"positive\",\"data\":{\"msteams\":{\"type\":\"messageBack\",\"text\":\"file issue\"},\"action\":\"file_issue\"}},{\"type\":\"Action.Submit\",\"title\":\"✅ Mark as Accepted Risk\",\"data\":{\"msteams\":{\"type\":\"messageBack\",\"text\":\"accept risk\"},\"action\":\"accept_risk\"}}]}"
+
+    # Step 6: Handle MED/HIGH severity — offer GitHub issue filing
+    - kind: ConditionGroup
+      id: conditionGroup_severity
+      conditions:
+        - id: conditionItem_highMed
+          condition: ="**Severity:** MED" in Topic.T_GapAnalysisJson || "**Severity:** HIGH" in Topic.T_GapAnalysisJson
+          actions:
+            - kind: Question
+              id: question_cardPrompt_s3Wq7t
+              variable: init:Topic.T_CardAction
+              prompt: "This is a **MED or HIGH** severity gap. Would you like to **file a GitHub issue** to track remediation? (Reply: *file issue* or *accept risk*)"
+              entity: StringPrebuiltEntity
+
+            - kind: ConditionGroup
+              id: conditionGroup_cardAction
+              conditions:
+                - id: conditionItem_createIssue
+                  condition: =Topic.T_CardAction = "file issue" || Topic.T_CardAction = "yes" || Topic.T_CardAction = "file it" || Topic.T_CardAction = "yes please" || Topic.T_CardAction = "file a github issue" || Topic.T_CardAction = "go ahead"
+                  actions:
+                    - kind: BeginDialog
+                      id: beginDialog_createIssue
+                      dialog: cr47b_agent.topic.GitHubIssueCreate
+
+              elseActions:
+                - kind: SendActivity
+                  id: sendMsg_acceptRisk
+                  activity: "✅ Understood. The risk has been accepted and noted. No GitHub issue will be filed."

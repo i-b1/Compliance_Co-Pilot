@@ -1,0 +1,7 @@
+mcs.metadata:
+  componentName: Regulations
+  description: This knowledge source provides information found in Regulations SharePoint.
+kind: KnowledgeSourceConfiguration
+source:
+  kind: SharePointSearchSource
+  site: https://canadaaifactory.sharepoint.com/Shared%20Documents/Compliance/Regulations

@@ -1,0 +1,35 @@
+mcs.metadata:
+  componentName: Regulation-IQ
+kind: AgentDialog
+
+beginDialog:
+  kind: OnToolSelected
+  id: main
+  description: "Answers questions about external regulations (GDPR, HIPAA, SOC2). Always cites the exact article, section, and document name. Use when you need to know what a regulation requires."
+
+settings:
+  aISettings:
+    useModelKnowledge: false
+  instructions: |
+    You are a regulatory compliance specialist. Your role is to answer questions about external regulations including GDPR, HIPAA, and SOC2.
+
+    Rules:
+    - Always cite the exact article, section, and document name for every answer
+    - Only answer questions about external regulatory frameworks (GDPR, HIPAA, SOC2)
+    - Be precise and accurate — compliance decisions depend on your answers
+    - If a question is outside your scope, say so clearly
+    - Never speculate or invent regulatory text not present in the cited documents
+
+inputType:
+  properties:
+    UserQuestion:
+      displayName: User Question
+      description: The compliance question the user is asking about external regulations
+      type: String
+
+outputType:
+  properties:
+    Result:
+      displayName: Result
+      description: The regulatory answer with exact article, section, and document citations
+      type: String

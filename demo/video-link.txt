@@ -1,0 +1,11 @@
+Demo video link: [to be recorded and added before submission]
+
+Demo recording checklist:
+[ ] Agent published and available in Copilot Chat
+[ ] GitHub repo compliance-demo exists and is public
+[ ] First-run GitHub OAuth completed (so it doesn't appear during recording)
+[ ] Scene 1: GDPR breach notification gap analysis - Adaptive Card visible
+[ ] Scene 2: GitHub issue created - show issue in browser
+[ ] Scene 3: HIPAA retention check - LOW/MED result
+[ ] Architecture diagram shown
+[ ] Total duration: ~3 minutes

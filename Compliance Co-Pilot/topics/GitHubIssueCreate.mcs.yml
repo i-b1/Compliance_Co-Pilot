@@ -1,0 +1,71 @@
+mcs.metadata:
+  componentName: GitHub Issue Create
+kind: AdaptiveDialog
+modelDescription: Use this topic when the user confirms they want to file a GitHub issue to track a compliance gap remediation. Triggers on affirmative responses after a compliance check.
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: GitHub Issue Create
+    triggerQueries:
+      - yes file the issue
+      - file a github issue
+      - create issue
+      - yes please
+      - go ahead and file
+      - file it
+      - file issue
+
+  actions:
+    # Resolve repo owner/name — ask once, then remember for the session
+    - kind: ConditionGroup
+      id: conditionGroup_aR7mX2
+      conditions:
+        - id: conditionItem_bK4nW9
+          condition: =IsBlank(Global.G_RepoOwner) || IsBlank(Global.G_RepoName)
+          actions:
+            - kind: Question
+              id: question_cL8pY3
+              interruptionPolicy:
+                allowInterruption: false
+              alwaysPrompt: true
+              variable: init:Topic.T_RepoInput
+              prompt: "What GitHub repository should I file this in? (format: **owner/repo**)"
+              entity: StringPrebuiltEntity
+
+            - kind: SetVariable
+              id: setVar_dM2qZ6
+              variable: Global.G_RepoOwner
+              value: =Left(Topic.T_RepoInput, Find("/", Topic.T_RepoInput) - 1)
+
+            - kind: SetVariable
+              id: setVar_eN5rA1
+              variable: Global.G_RepoName
+              value: =Mid(Topic.T_RepoInput, Find("/", Topic.T_RepoInput) + 1)
+
+    # Extract severity from gap analysis for the issue title prefix
+    - kind: AnswerQuestionWithAI
+      id: answerAI_extractSeverity
+      variable: init:Topic.T_Severity
+      userInput: =Global.G_GapAnalysis
+      additionalInstructions: "Extract only the severity level from the gap analysis text. Return exactly one word: HIGH, MED, or LOW. Nothing else."
+
+    - kind: SendActivity
+      id: sendMsg_fP9sB7
+      activity: "Filing GitHub issue in **{Global.G_RepoOwner}/{Global.G_RepoName}**... ⏳"
+
+    # Call GitHub MCP to create the issue
+    - kind: AnswerQuestionWithAI
+      id: answerAI_createIssue
+      variable: init:Topic.T_IssueResult
+      userInput: ="Create a GitHub issue in the repository " & Global.G_RepoOwner & "/" & Global.G_RepoName & " with the following details:" & Char(10) & Char(10) & "Title: [" & Topic.T_Severity & "] Compliance gap — " & Char(10) & Char(10) & Global.G_GapAnalysis & Char(10) & Char(10) & "Labels: compliance, " & Lower(Topic.T_Severity) & Char(10) & Char(10) & "Use the GitHub - Create Issue tool now. Return the issue number and the full URL."
+      additionalInstructions: "Use the GitHub MCP tool to create the issue exactly as specified. The issue title must start with [HIGH], [MED], or [LOW] based on the severity. Include both regulatory and internal policy citations in the body. Return only the issue number and URL."
+
+    - kind: SendActivity
+      id: sendMsg_hR6uD8
+      activity: |-
+        ✅ **GitHub issue filed successfully.**
+
+        {Topic.T_IssueResult}
+
+        The compliance team can now track this remediation in GitHub.

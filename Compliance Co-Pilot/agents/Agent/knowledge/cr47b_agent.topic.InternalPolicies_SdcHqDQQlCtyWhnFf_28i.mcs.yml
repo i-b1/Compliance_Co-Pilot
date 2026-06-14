@@ -1,0 +1,7 @@
+mcs.metadata:
+  componentName: InternalPolicies
+  description: This knowledge source provides information found in InternalPolicies SharePoint.
+kind: KnowledgeSourceConfiguration
+source:
+  kind: SharePointSearchSource
+  site: https://canadaaifactory.sharepoint.com/Shared%20Documents/Compliance/InternalPolicies

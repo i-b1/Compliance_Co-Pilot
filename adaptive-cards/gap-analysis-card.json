@@ -1,0 +1,186 @@
+{
+  "$schema": "https://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "Container",
+      "style": "emphasis",
+      "bleed": true,
+      "items": [
+        {
+          "type": "ColumnSet",
+          "columns": [
+            {
+              "type": "Column",
+              "width": "stretch",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "🔍 Compliance Gap Analysis",
+                  "weight": "Bolder",
+                  "size": "Large",
+                  "color": "Accent"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "Powered by Compliance Co-Pilot",
+                  "isSubtle": true,
+                  "size": "Small",
+                  "spacing": "None"
+                }
+              ]
+            },
+            {
+              "type": "Column",
+              "width": "auto",
+              "verticalContentAlignment": "Center",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "${severity}",
+                  "weight": "Bolder",
+                  "size": "Medium",
+                  "color": "${if(severity == 'HIGH', 'Attention', if(severity == 'MED', 'Warning', 'Good'))}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ColumnSet",
+      "spacing": "Medium",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "stretch",
+          "style": "accent",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "📋 Regulator Says",
+              "weight": "Bolder",
+              "size": "Small"
+            },
+            {
+              "type": "TextBlock",
+              "text": "${regulator_says}",
+              "wrap": true,
+              "size": "Small"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Citation: ${regulator_citation}",
+              "wrap": true,
+              "size": "Small",
+              "isSubtle": true,
+              "spacing": "Small"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "style": "good",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "🏢 We Say",
+              "weight": "Bolder",
+              "size": "Small"
+            },
+            {
+              "type": "TextBlock",
+              "text": "${we_say}",
+              "wrap": true,
+              "size": "Small"
+            },
+            {
+              "type": "TextBlock",
+              "text": "Citation: ${policy_citation}",
+              "wrap": true,
+              "size": "Small",
+              "isSubtle": true,
+              "spacing": "Small"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "stretch",
+          "style": "attention",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "⚠️ Gap",
+              "weight": "Bolder",
+              "size": "Small"
+            },
+            {
+              "type": "TextBlock",
+              "text": "${gap_description}",
+              "wrap": true,
+              "size": "Small"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "💡 Recommendation",
+          "weight": "Bolder",
+          "size": "Small"
+        },
+        {
+          "type": "TextBlock",
+          "text": "${recommendation}",
+          "wrap": true,
+          "size": "Small",
+          "spacing": "Small"
+        }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "Topic: ${topic} | Regulation: ${regulation_name}",
+      "isSubtle": true,
+      "size": "Small",
+      "spacing": "Medium"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "📌 File GitHub Issue",
+      "style": "positive",
+      "data": {
+        "msteams": {
+          "type": "messageBack",
+          "text": "file issue"
+        },
+        "action": "file_issue",
+        "severity": "${severity}",
+        "topic": "${topic}",
+        "body": "${regulator_says}\n\nWe Say: ${we_say}\n\nGap: ${gap_description}\n\nRecommendation: ${recommendation}\n\nCitations:\n- Regulator: ${regulator_citation}\n- Policy: ${policy_citation}"
+      }
+    },
+    {
+      "type": "Action.Submit",
+      "title": "✅ Mark as Accepted Risk",
+      "data": {
+        "msteams": {
+          "type": "messageBack",
+          "text": "accept risk"
+        },
+        "action": "accept_risk"
+      }
+    }
+  ]
+}

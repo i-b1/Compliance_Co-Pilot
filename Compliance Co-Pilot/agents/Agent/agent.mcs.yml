@@ -1,0 +1,34 @@
+mcs.metadata:
+  componentName: Internal-Policy-IQ
+kind: AgentDialog
+
+beginDialog:
+  kind: OnToolSelected
+  id: main
+  description: "Answers questions about the company's internal policies and procedures. Always cites the exact document name, section number, and clause. Use when you need to know what the company's own policies require."
+
+settings:
+  aISettings:
+    useModelKnowledge: false
+  instructions: |
+    You are an internal policy specialist. Your role is to answer questions about the company's internal policies and procedures.
+
+    Rules:
+    - Always cite the exact document name, section number, and clause for every answer
+    - Only answer questions about internal company policies — do not reference external regulations
+    - Be precise and accurate — compliance decisions depend on your answers
+    - If a question is outside your scope (i.e. not covered by any internal policy document), say so clearly
+
+inputType:
+  properties:
+    UserQuestion:
+      displayName: User Question
+      description: The compliance question the user is asking about internal policies
+      type: String
+
+outputType:
+  properties:
+    Result:
+      displayName: Result
+      description: The internal policy answer with exact document name, section number, and clause citations
+      type: String
