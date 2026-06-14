@@ -2,7 +2,7 @@
 
 > **Agents League Hackathon — Enterprise Agents Track**
 
-NOTE:  **See [Policy Compliance Co-Pilot](docs/presentation.html) for full interactive presentation.**
+NOTE:  **See [Policy Compliance Co-Pilot Deck](https://htmlpreview.github.io/?https://github.com/i-b1/Compliance_Co-Pilot/blob/main/docs/presentation.html) for full interactive presentation.**
 
 Ask Copilot Chat _"Is our new feature GDPR-compliant?"_ and get a side-by-side gap analysis between the regulator's rules and your company's internal policy — with a one-click action to file a compliance issue on GitHub.
 
